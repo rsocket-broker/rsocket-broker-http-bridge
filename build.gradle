@@ -1,0 +1,151 @@
+plugins {
+	id 'com.jfrog.artifactory' version '4.11.0' apply false
+	id 'com.jfrog.bintray' version '1.8.4' apply false
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+subprojects {
+	apply plugin: 'java-library'
+	apply plugin: 'io.spring.dependency-management'
+	apply plugin: 'maven-publish'
+	apply plugin: 'com.jfrog.artifactory'
+	apply plugin: 'com.jfrog.bintray'
+
+	sourceCompatibility = '1.8'
+
+	repositories {
+	  if (version.endsWith('SNAPSHOT')) {
+        mavenLocal()
+		maven { url 'https://repo.spring.io/snapshot' }
+		maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
+	  }
+	  mavenCentral()
+	  maven { url 'https://repo.spring.io/milestone' }
+	}
+
+	dependencyManagement {
+		imports {
+			mavenBom "io.projectreactor:reactor-bom:${reactorBomVersion}"
+			mavenBom "org.junit:junit-bom:${junitJupiterVersion}"
+			mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+			mavenBom "io.rsocket:rsocket-bom:${rsocketVersion}"
+			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		}
+
+		dependencies {
+			dependency "io.rsocket.routing:rsocket-routing-client:${rsocketRoutingClientVersion}"
+			dependency "io.rsocket.routing:rsocket-routing-common:${rsocketRoutingClientVersion}"
+			dependency "io.rsocket.routing:rsocket-routing-common-spring:${rsocketRoutingClientVersion}"
+			dependency "io.rsocket.routing:rsocket-routing-frames:${rsocketRoutingClientVersion}"
+			dependency "org.agrona:agrona:${agronaVersion}"
+			dependency "org.assertj:assertj-core:${assertjVersion}"
+			dependency "org.mockito:mockito-core:${mockitoVersion}"
+			dependency "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+			dependency "org.roaringbitmap:RoaringBitmap:${roaringbitmapVersion}"
+			dependency "io.rsocket.routing:rsocket-routing-client-spring:${rsocketRoutingClientVersion}"
+		}
+	}
+
+	java {
+		withJavadocJar()
+		withSourcesJar()
+	}
+
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+				versionMapping {
+					usage('java-api') {
+						fromResolutionOf('runtimeClasspath')
+					}
+					usage('java-runtime') {
+						fromResolutionResult()
+					}
+				}
+			}
+		}
+	}
+
+	if (System.getenv().containsKey('BINTRAY_USER') && System.getenv().containsKey('BINTRAY_KEY')) {
+
+		// from https://reflectoring.io/publish-snapshots-with-gradle/
+		artifactory {
+			contextUrl = 'https://oss.jfrog.org'
+			publish {
+				repository {
+					repoKey = 'oss-snapshot-local'
+					username = System.getenv('BINTRAY_USER')
+					password = System.getenv('BINTRAY_KEY')
+				}
+				defaults {
+					publications(publishing.publications.mavenJava)
+					publishArtifacts = true
+					publishPom = true
+				}
+			}
+			resolve {
+				repoKey = 'jcenter'
+			}
+			clientConfig.info.setBuildNumber(System.getProperty('build.number'))
+		}
+	}
+
+	if (System.getenv().containsKey('BINTRAY_USER') && System.getenv().containsKey('BINTRAY_KEY')
+			&& System.getenv().containsKey('SONATYPE_USERNAME') && System.getenv().containsKey('SONATYPE_PASSWORD')) {
+		plugins.withId('com.jfrog.bintray') {
+			bintray {
+				user = System.getenv('BINTRAY_USER')
+				key = System.getenv('BINTRAY_KEY')
+
+				publications = ['mavenJava']
+				publish = true
+				override = true
+
+				pkg {
+					repo = 'RSocket'
+					name = 'rsocket-routing-broker'
+					licenses = ['Apache-2.0']
+
+					issueTrackerUrl = 'https://github.com/rsocket-routing/rsocket-routing-broker/issues'
+					websiteUrl = 'https://github.com/rsocket-routing/rsocket-routing-broker'
+					vcsUrl = 'https://github.com/rsocket-routing/rsocket-routing-broker.git'
+
+					githubRepo = 'rsocket-routing/rsocket-routing-broker' //Optional Github repository
+					githubReleaseNotesFile = 'README.md' //Optional Github readme file
+
+					version {
+						name = project.version
+						released = new Date()
+						vcsTag = project.version
+
+						gpg {
+							sign = true
+						}
+
+						mavenCentralSync {
+							user = System.getenv('SONATYPE_USERNAME')
+							password = System.getenv('SONATYPE_PASSWORD')
+						}
+					}
+				}
+			}
+			tasks.named("bintrayUpload").configure {
+				onlyIf { System.getenv('SKIP_RELEASE') != "true" }
+			}
+		}
+	}
+
+	test {
+		useJUnitPlatform()
+	}
+
+}
+
+apply from: "${rootDir}/gradle/publications.gradle"
+
+description = 'RSocket Routing Broker'
+
+wrapper {
+	distributionType = Wrapper.DistributionType.ALL
+}

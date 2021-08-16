@@ -1,0 +1,10 @@
+plugins {
+	id 'org.kordamp.gradle.insight' version '0.40.0'
+}
+
+rootProject.name = 'rsocket-routing-broker'
+
+include "rsocket-routing-broker"
+include "rsocket-routing-broker-spring"
+include 'rsocket-routing-http-bridge'
+
