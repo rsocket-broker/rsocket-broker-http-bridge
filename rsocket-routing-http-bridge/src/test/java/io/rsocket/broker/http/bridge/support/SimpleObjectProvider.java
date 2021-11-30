@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.support;
+package io.rsocket.broker.http.bridge.support;
 
 import java.util.stream.Stream;
 

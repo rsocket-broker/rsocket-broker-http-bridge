@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.core;
+package io.rsocket.broker.http.bridge.core;
 
 import java.time.Duration;
 import java.util.function.Function;
 
-import io.rsocket.routing.client.spring.RoutingRSocketRequester;
-import io.rsocket.routing.common.spring.ClientTransportFactory;
-import io.rsocket.routing.http.bridge.config.RSocketHttpBridgeProperties;
+import io.rsocket.broker.client.spring.BrokerRSocketRequester;
+import io.rsocket.broker.common.spring.ClientTransportFactory;
+import io.rsocket.broker.http.bridge.config.RSocketHttpBridgeProperties;
 import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -38,12 +38,12 @@ abstract class AbstractHttpRSocketFunction<I, O> implements Function<I, O> {
 
 	protected final Log LOG = getLog(getClass());
 
-	protected RoutingRSocketRequester requester;
+	protected BrokerRSocketRequester requester;
 	ObjectProvider<ClientTransportFactory> transportFactories;
 	protected final RSocketHttpBridgeProperties properties;
 	protected final Duration timeout;
 
-	protected AbstractHttpRSocketFunction(RoutingRSocketRequester requester, ObjectProvider<ClientTransportFactory> transportFactories,
+	protected AbstractHttpRSocketFunction(BrokerRSocketRequester requester, ObjectProvider<ClientTransportFactory> transportFactories,
 			RSocketHttpBridgeProperties properties) {
 		this.properties = properties;
 		timeout = properties.getTimeout();

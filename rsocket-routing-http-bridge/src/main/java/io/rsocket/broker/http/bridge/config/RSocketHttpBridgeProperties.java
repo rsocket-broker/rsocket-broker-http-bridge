@@ -15,13 +15,13 @@
  */
 
 
-package io.rsocket.routing.http.bridge.config;
+package io.rsocket.broker.http.bridge.config;
 
 import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import static io.rsocket.routing.http.bridge.config.RSocketHttpBridgeProperties.BRIDGE_CONFIG_PREFIX;
+import static io.rsocket.broker.http.bridge.config.RSocketHttpBridgeProperties.BRIDGE_CONFIG_PREFIX;
 
 /**
  * Configuration properties for HTTP Rsocket brige.

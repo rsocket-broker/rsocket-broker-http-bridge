@@ -14,44 +14,46 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.core;
+package io.rsocket.broker.http.bridge.core;
 
 import java.net.URI;
 
-import io.rsocket.routing.client.spring.RoutingRSocketRequester;
-import io.rsocket.routing.client.spring.RoutingRSocketRequesterBuilder;
-import io.rsocket.routing.common.spring.ClientTransportFactory;
-import io.rsocket.routing.http.bridge.config.RSocketHttpBridgeProperties;
+import io.rsocket.broker.client.spring.BrokerRSocketRequester;
+import io.rsocket.broker.common.spring.ClientTransportFactory;
+import io.rsocket.broker.http.bridge.config.RSocketHttpBridgeProperties;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.messaging.Message;
 
-import static io.rsocket.routing.common.WellKnownKey.SERVICE_NAME;
-import static io.rsocket.routing.http.bridge.core.PathUtils.resolveAddress;
-import static io.rsocket.routing.http.bridge.core.PathUtils.resolveRoute;
-import static io.rsocket.routing.http.bridge.core.TagBuilder.buildTags;
+import static io.rsocket.broker.common.WellKnownKey.SERVICE_NAME;
+import static io.rsocket.broker.http.bridge.core.PathUtils.resolveAddress;
+import static io.rsocket.broker.http.bridge.core.PathUtils.resolveRoute;
+import static io.rsocket.broker.http.bridge.core.TagBuilder.buildTags;
 
 /**
- * HTTP to RSocket Fire-and-Forget mode function. Requests with path starting with {@code ff}
+ * HTTP to RSocket Request-Stream mode function. Requests with path starting with {@code rs}
  * will be processed by this function.
  *
  * @author Olga Maciaszek-Sharma
  * @since 0.3.0
  */
-public class FireAndForgetFunction extends AbstractHttpRSocketFunction<Mono<Message<Byte[]>>, Mono<Void>> {
+public class RequestStreamFunction extends AbstractHttpRSocketFunction<Mono<Message<Byte[]>>, Flux<Message<Byte[]>>> {
 
-	public FireAndForgetFunction(RoutingRSocketRequester requester, ObjectProvider<ClientTransportFactory> transportFactories, RSocketHttpBridgeProperties properties) {
+	public RequestStreamFunction(BrokerRSocketRequester requester,
+			ObjectProvider<ClientTransportFactory> transportFactories, RSocketHttpBridgeProperties properties) {
 		super(requester, transportFactories, properties);
 	}
 
 	@Override
-	public Mono<Void> apply(Mono<Message<Byte[]>> messageMono) {
-		return messageMono.flatMap(message -> {
+	public Flux<Message<Byte[]>> apply(Mono<Message<Byte[]>> messageMono) {
+		return Flux.from(messageMono).flatMap(message -> {
 			String uriString = (String) message.getHeaders().get("uri");
 			if (uriString == null) {
 				LOG.error("Uri cannot be null.");
-				return Mono.error(new IllegalArgumentException("Uri cannot be null"));
+				return Flux.error(new IllegalArgumentException("Uri cannot be null"));
 			}
 			URI uri = URI.create(uriString);
 			String route = resolveRoute(uri);
@@ -63,17 +65,18 @@ public class FireAndForgetFunction extends AbstractHttpRSocketFunction<Mono<Mess
 					.address(builder -> builder.with(SERVICE_NAME, serviceName)
 							.with(buildTags(tagString)))
 					.data(message.getPayload())
-					.send()
+					.retrieveFlux(new ParameterizedTypeReference<Message<Byte[]>>() {
+					})
 					.timeout(timeout,
-							Mono.defer(() -> {
+							Flux.defer(() -> {
 								logTimeout(serviceName, route);
 								// Mono.just("Request has timed out); ?
-								return Mono
-										.error(new IllegalArgumentException("Request has timed out."));
-							}))
+										return Flux
+												.error(new IllegalArgumentException("Request has timed out."));
+									}))
 							.onErrorResume(error -> {
 								logException(error, serviceName, route);
-								return Mono.error(error);
+								return Flux.error(error);
 							});
 				}
 		);

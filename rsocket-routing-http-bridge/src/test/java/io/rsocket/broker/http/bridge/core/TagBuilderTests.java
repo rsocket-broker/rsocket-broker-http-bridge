@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.core;
+package io.rsocket.broker.http.bridge.core;
 
-import io.rsocket.routing.common.Tags;
-import io.rsocket.routing.common.WellKnownKey;
+import io.rsocket.broker.common.Tags;
+import io.rsocket.broker.common.WellKnownKey;
 import org.junit.jupiter.api.Test;
 
-import static io.rsocket.routing.http.bridge.core.TagBuilder.buildTags;
+import static io.rsocket.broker.http.bridge.core.TagBuilder.buildTags;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.core;
+package io.rsocket.broker.http.bridge.core;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import io.rsocket.routing.http.bridge.support.SimpleClientTransportFactory;
-import io.rsocket.routing.http.bridge.support.SimpleObjectProvider;
+import io.rsocket.broker.http.bridge.support.SimpleClientTransportFactory;
+import io.rsocket.broker.http.bridge.support.SimpleObjectProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

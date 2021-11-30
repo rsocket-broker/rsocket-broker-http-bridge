@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.core;
+package io.rsocket.broker.http.bridge.core;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-import io.rsocket.routing.common.Key;
-import io.rsocket.routing.common.Tags;
-import io.rsocket.routing.common.WellKnownKey;
+import io.rsocket.broker.common.Key;
+import io.rsocket.broker.common.Tags;
+import io.rsocket.broker.common.WellKnownKey;
 
 /**
  * Utility class for processing routing tags.

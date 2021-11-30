@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.config;
+package io.rsocket.broker.http.bridge.config;
 
 import java.util.function.Function;
 
-import io.rsocket.routing.client.spring.RoutingRSocketRequester;
-import io.rsocket.routing.client.spring.RoutingRSocketRequesterBuilder;
-import io.rsocket.routing.common.spring.ClientTransportFactory;
-import io.rsocket.routing.http.bridge.core.FireAndForgetFunction;
-import io.rsocket.routing.http.bridge.core.RequestChannelFunction;
-import io.rsocket.routing.http.bridge.core.RequestResponseFunction;
-import io.rsocket.routing.http.bridge.core.RequestStreamFunction;
+import io.rsocket.broker.client.spring.BrokerRSocketRequester;
+import io.rsocket.broker.client.spring.BrokerRSocketRequesterBuilder;
+import io.rsocket.broker.common.spring.ClientTransportFactory;
+import io.rsocket.broker.http.bridge.core.FireAndForgetFunction;
+import io.rsocket.broker.http.bridge.core.RequestChannelFunction;
+import io.rsocket.broker.http.bridge.core.RequestResponseFunction;
+import io.rsocket.broker.http.bridge.core.RequestStreamFunction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -49,17 +49,17 @@ import org.springframework.messaging.Message;
  * @since 0.3.0
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnBean({RoutingRSocketRequester.class, RoutingRSocketRequesterBuilder.class})
+@ConditionalOnBean({BrokerRSocketRequester.class, BrokerRSocketRequesterBuilder.class})
 @ConditionalOnProperty(value = "spring.cloud.rsocket.routing.http-bridge.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(RSocketHttpBridgeProperties.class)
 public class RSocketHttpBridgeAutoConfiguration implements ApplicationContextAware, InitializingBean {
 
-	private final RoutingRSocketRequester requester;
+	private final BrokerRSocketRequester requester;
 	private final RSocketHttpBridgeProperties properties;
 	private final ObjectProvider<ClientTransportFactory> transportFactories;
 	private ConfigurableApplicationContext applicationContext;
 
-	public RSocketHttpBridgeAutoConfiguration(RoutingRSocketRequester requester, RSocketHttpBridgeProperties properties,
+	public RSocketHttpBridgeAutoConfiguration(BrokerRSocketRequester requester, RSocketHttpBridgeProperties properties,
 			ObjectProvider<ClientTransportFactory> transportFactories) {
 		this.requester = requester;
 		this.properties = properties;

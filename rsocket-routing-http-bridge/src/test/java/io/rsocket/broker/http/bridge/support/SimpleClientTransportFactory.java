@@ -14,34 +14,28 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.support;
+package io.rsocket.broker.http.bridge.support;
 
-import io.rsocket.DuplexConnection;
-import io.rsocket.routing.common.spring.TransportProperties;
+import java.net.URI;
+
+import io.rsocket.broker.common.spring.ClientTransportFactory;
 import io.rsocket.transport.ClientTransport;
-import reactor.core.publisher.Mono;
 
 /**
- * Test-specific implementation of {@link ClientTransport}.
+ * Test-specific implementation of {@link ClientTransportFactory}.
  *
  * @author Olga Maciaszek-Sharma
  * @since 0.3.0
  */
-public class SimpleClientTransport implements ClientTransport {
-
-	private final TransportProperties broker;
-
-	public SimpleClientTransport(TransportProperties broker) {
-		this.broker = broker;
-	}
-
+public class SimpleClientTransportFactory implements ClientTransportFactory {
 
 	@Override
-	public Mono<DuplexConnection> connect() {
-		return Mono.empty();
+	public boolean supports(URI uri) {
+		return true;
 	}
 
-	public TransportProperties getBroker() {
-		return broker;
+	@Override
+	public ClientTransport create(URI uri) {
+		return new SimpleClientTransport(uri);
 	}
 }

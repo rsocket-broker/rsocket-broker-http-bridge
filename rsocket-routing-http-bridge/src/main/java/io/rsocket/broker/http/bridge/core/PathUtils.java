@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.core;
+package io.rsocket.broker.http.bridge.core;
 
 import java.net.URI;
 import java.util.Arrays;

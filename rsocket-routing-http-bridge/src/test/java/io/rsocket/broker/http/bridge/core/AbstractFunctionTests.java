@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package io.rsocket.routing.http.bridge.core;
+package io.rsocket.broker.http.bridge.core;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import io.rsocket.routing.client.spring.RoutingRSocketRequester;
-import io.rsocket.routing.http.bridge.config.RSocketHttpBridgeProperties;
+import io.rsocket.broker.client.spring.BrokerRSocketRequester;
+import io.rsocket.broker.http.bridge.config.RSocketHttpBridgeProperties;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.messaging.Message;
@@ -44,8 +44,8 @@ abstract class AbstractFunctionTests {
 
 	static final Duration VERIFY_TIMEOUT = Duration.ofMillis(100);
 
-	protected RoutingRSocketRequester requester = mock(RoutingRSocketRequester.class);
-	protected RoutingRSocketRequester.RoutingRequestSpec requestSpec = mock(RoutingRSocketRequester.RoutingRequestSpec.class);
+	protected BrokerRSocketRequester requester = mock(BrokerRSocketRequester.class);
+	protected BrokerRSocketRequester.BrokerRequestSpec requestSpec = mock(BrokerRSocketRequester.BrokerRequestSpec.class);
 	protected RSocketRequester.RetrieveSpec retrieveSpec = mock(RSocketRequester.RetrieveSpec.class);
 	protected Message<Byte[]> outputMessage = new GenericMessage<>(buildPayload("output"));
 	protected RSocketHttpBridgeProperties properties = new RSocketHttpBridgeProperties();
