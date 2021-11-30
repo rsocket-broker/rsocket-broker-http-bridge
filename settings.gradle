@@ -3,6 +3,3 @@ plugins {
 }
 
 rootProject.name = 'rsocket-routing-http-bridge'
-
-include 'rsocket-routing-http-bridge'
-
