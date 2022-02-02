@@ -50,7 +50,7 @@ import org.springframework.messaging.Message;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean({BrokerRSocketRequester.class, BrokerRSocketRequesterBuilder.class})
-@ConditionalOnProperty(value = "spring.cloud.rsocket.routing.http-bridge.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.rsocket.broker.http-bridge.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(RSocketHttpBridgeProperties.class)
 public class RSocketHttpBridgeAutoConfiguration implements ApplicationContextAware, InitializingBean {
 
