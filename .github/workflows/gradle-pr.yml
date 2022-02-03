@@ -5,6 +5,10 @@ name: Pull Request Java CI with Gradle
 
 on: [pull_request]
 
+env:
+  USERNAME: ${{ secrets.USERNAME }}
+  TOKEN: ${{ secrets.TOKEN }}
+
 permissions:
   packages: read
 
