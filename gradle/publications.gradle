@@ -1,53 +1,57 @@
 apply from: "${rootDir}/gradle/github-pkg.gradle"
 apply from: "${rootDir}/gradle/sonotype.gradle"
 
-subprojects {
-    plugins.withType(MavenPublishPlugin) {
-        publishing {
-            publications {
-                maven(MavenPublication) {
-                    pom {
-                        name = project.name
-                        afterEvaluate {
-                            description = project.description
-                        }
-                        groupId = 'io.rsocket.broker'
-                        url = 'https://github.com/rsocket-broker'
-                        licenses {
-                            license {
-                                name = "The Apache Software License, Version 2.0"
-                                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                                distribution = "repo"
-                            }
-                        }
-                        developers {
-                            developer {
-                                id = 'spencergibb'
-                                name = 'Spencer Gibb'
-                                email = 'sgibb@vmware.com'
-                            }
-                            developer {
-                                id = 'OlegDokuka'
-                                name = 'Oleh Dokuka'
-                                email = 'oleh.dokuka@icloud.com'
-                            }
-                        }
-                        scm {
-                            connection = 'scm:git:https://github.com/rsocket-broker/rsocket-broker-http-bridge.git'
-                            developerConnection = 'scm:git:https://github.com/rsocket-broker/rsocket-broker-http-bridge.git'
-                            url = 'https://github.com/rsocket-broker/rsocket-broker-http-bridge'
-                        }
-                        versionMapping {
-                            usage('java-api') {
-                                fromResolutionResult()
-                            }
-                            usage('java-runtime') {
-                                fromResolutionResult()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+
+plugins.withType(MavenPublishPlugin) {
+	publishing {
+		publications {
+			maven(MavenPublication) {
+				pom {
+					name = project.name
+					afterEvaluate {
+						description = project.description
+					}
+					groupId = 'io.rsocket.broker'
+					url = 'https://github.com/rsocket-broker'
+					licenses {
+						license {
+							name = "The Apache Software License, Version 2.0"
+							url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+							distribution = "repo"
+						}
+					}
+					developers {
+						developer {
+							id = 'spencergibb'
+							name = 'Spencer Gibb'
+							email = 'sgibb@vmware.com'
+						}
+						developer {
+							id = 'OlegDokuka'
+							name = 'Oleh Dokuka'
+							email = 'oleh.dokuka@icloud.com'
+						}
+						developer {
+							id = 'OlgaMaciaszek'
+							name = 'Olga Maciaszek-Sharma'
+							email = 'omaciaszeksh@vmware.com'
+						}
+					}
+					scm {
+						connection = 'scm:git:https://github.com/rsocket-broker/rsocket-broker-http-bridge.git'
+						developerConnection = 'scm:git:https://github.com/rsocket-broker/rsocket-broker-http-bridge.git'
+						url = 'https://github.com/rsocket-broker/rsocket-broker-http-bridge'
+					}
+					versionMapping {
+						usage('java-api') {
+							fromResolutionResult()
+						}
+						usage('java-runtime') {
+							fromResolutionResult()
+						}
+					}
+				}
+			}
+		}
+	}
 }

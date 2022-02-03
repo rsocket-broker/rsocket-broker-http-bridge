@@ -1,5 +1,5 @@
 plugins {
-	id 'com.jfrog.artifactory' version '4.11.0' apply false
+	id 'com.jfrog.artifactory' version '4.21.0' apply false
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
@@ -7,17 +7,25 @@ apply plugin: 'java-library'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'signing'
 
 sourceCompatibility = '1.8'
 
 repositories {
-  if (version.endsWith('SNAPSHOT')) {
-	mavenLocal()
-	maven { url 'https://repo.spring.io/snapshot' }
-	maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
-  }
-  mavenCentral()
-  maven { url 'https://repo.spring.io/milestone' }
+	if (version.endsWith('SNAPSHOT')) {
+		mavenLocal()
+		maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
+		maven {
+			url = uri("https://maven.pkg.github.com/rsocket-broker/rsocket-broker-client")
+			credentials {
+				username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+				password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+			}
+		}
+		maven { url 'https://repo.spring.io/snapshot' }
+	}
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencyManagement {
@@ -45,8 +53,7 @@ dependencies {
 	api 'org.springframework.boot:spring-boot-starter-webflux'
 	api 'org.springframework.boot:spring-boot-starter-rsocket'
 	implementation 'io.rsocket.broker:rsocket-broker-client-spring'
-	// FIXME: switch back to bom when function 3.2.0 available
-	implementation 'org.springframework.cloud:spring-cloud-function-web:3.2.0-SNAPSHOT'
+	implementation 'org.springframework.cloud:spring-cloud-function-web'
 	implementation 'org.springframework.cloud:spring-cloud-function-rsocket'
 
 	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
@@ -56,95 +63,31 @@ dependencies {
 	testImplementation'io.projectreactor:reactor-test'
 }
 
-java {
-	withJavadocJar()
-	withSourcesJar()
-}
+plugins.withType(JavaLibraryPlugin) {
+	task sourcesJar(type: Jar) {
+		classifier 'sources'
+		from sourceSets.main.allJava
+	}
 
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			from components.java
-			versionMapping {
-				usage('java-api') {
-					fromResolutionOf('runtimeClasspath')
-				}
-				usage('java-runtime') {
-					fromResolutionResult()
+	task javadocJar(type: Jar, dependsOn: javadoc) {
+		classifier 'javadoc'
+		from javadoc.destinationDir
+	}
+
+	plugins.withType(MavenPublishPlugin) {
+		publishing {
+			publications {
+				maven(MavenPublication) {
+					from components.java
+					artifact sourcesJar
+					artifact javadocJar
 				}
 			}
 		}
 	}
 }
 
-if (System.getenv().containsKey('BINTRAY_USER') && System.getenv().containsKey('BINTRAY_KEY')) {
 
-	// from https://reflectoring.io/publish-snapshots-with-gradle/
-	artifactory {
-		contextUrl = 'https://oss.jfrog.org'
-		publish {
-			repository {
-				repoKey = 'oss-snapshot-local'
-				username = System.getenv('BINTRAY_USER')
-				password = System.getenv('BINTRAY_KEY')
-			}
-			defaults {
-				publications(publishing.publications.mavenJava)
-				publishArtifacts = true
-				publishPom = true
-			}
-		}
-		resolve {
-			repoKey = 'jcenter'
-		}
-		clientConfig.info.setBuildNumber(System.getProperty('build.number'))
-	}
-}
-
-if (System.getenv().containsKey('BINTRAY_USER') && System.getenv().containsKey('BINTRAY_KEY')
-		&& System.getenv().containsKey('SONATYPE_USERNAME') && System.getenv().containsKey('SONATYPE_PASSWORD')) {
-	plugins.withId('com.jfrog.bintray') {
-		bintray {
-			user = System.getenv('BINTRAY_USER')
-			key = System.getenv('BINTRAY_KEY')
-
-			publications = ['mavenJava']
-			publish = true
-			override = true
-
-			pkg {
-				repo = 'RSocket'
-				name = 'rsocket-broker-http-bridge'
-				licenses = ['Apache-2.0']
-
-				issueTrackerUrl = 'https://github.com/rsocket-routing/rsocket-broker-http-bridge/issues'
-				websiteUrl = 'https://github.com/rsocket-routing/rsocket-broker-http-bridge'
-				vcsUrl = 'https://github.com/rsocket-routing/rsocket-broker-http-bridge.git'
-
-				githubRepo = 'rsocket-routing/rsocket-broker-http-bridge' //Optional Github repository
-				githubReleaseNotesFile = 'README.md' //Optional Github readme file
-
-				version {
-					name = project.version
-					released = new Date()
-					vcsTag = project.version
-
-					gpg {
-						sign = true
-					}
-
-					mavenCentralSync {
-						user = System.getenv('SONATYPE_USERNAME')
-						password = System.getenv('SONATYPE_PASSWORD')
-					}
-				}
-			}
-		}
-		tasks.named("bintrayUpload").configure {
-			onlyIf { System.getenv('SKIP_RELEASE') != "true" }
-		}
-	}
-}
 
 test {
 	useJUnitPlatform()

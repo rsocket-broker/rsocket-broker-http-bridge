@@ -6,16 +6,13 @@ name: Pull Request Java CI with Gradle
 on: [pull_request]
 
 env:
-  USERNAME: ${{ secrets.USERNAME }}
-  TOKEN: ${{ secrets.TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions:
   packages: read
 
 jobs:
   build:
-    environment:
-      name: PR
 
     runs-on: ubuntu-latest
 
