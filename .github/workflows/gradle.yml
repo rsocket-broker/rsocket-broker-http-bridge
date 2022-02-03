@@ -3,6 +3,12 @@
 
 name: Java CI with Gradle
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  packages: write
+
 on:
   push:
     branches: [ main ]
