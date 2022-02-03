@@ -1,21 +1,20 @@
-subprojects {
-
-  plugins.withType(MavenPublishPlugin) {
+plugins.withType(MavenPublishPlugin) {
 	publishing {
-	  repositories {
-		maven {
-		  name = "GitHubPackages"
-		  url = uri("https://maven.pkg.github.com/rsocket-broker/rsocket-broker-http-bridge")
-		  credentials {
-			username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
-			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-		  }
+		repositories {
+			maven {
+				name = "GitHubPackages"
+				url = uri("https://maven.pkg.github.com/rsocket-broker/rsocket-broker-http-bridge")
+				credentials {
+					username = project.findProperty("gpr.user") ?:
+							System.getenv("GITHUB_ACTOR")
+					password = project.findProperty("gpr.key") ?:
+							System.getenv("GITHUB_TOKEN")
+				}
+			}
 		}
-	  }
 	}
 
 	tasks.named("publish").configure {
-	  onlyIf { System.getenv('SKIP_RELEASE') != "true" }
+		onlyIf { System.getenv('SKIP_RELEASE') != "true" }
 	}
-  }
 }
