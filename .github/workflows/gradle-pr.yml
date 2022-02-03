@@ -8,6 +8,7 @@ on: [pull_request]
 env:
   USERNAME: ${{ secrets.USERNAME }}
   TOKEN: ${{ secrets.TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions:
   packages: read
