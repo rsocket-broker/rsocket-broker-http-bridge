@@ -53,7 +53,7 @@ class FireAndForgetFunctionTests extends AbstractFunctionTests {
 	void shouldReturnSendAndCompleteStream() {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("uri", "http://test.org/testAddress/testRoute");
-		Message<Byte[]> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
+		Message<Object> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
 		StepVerifier.create(function.apply(Mono.just(inputMessage)))
 				.expectSubscription()
 				.expectNextCount(0)
@@ -62,7 +62,7 @@ class FireAndForgetFunctionTests extends AbstractFunctionTests {
 
 	@Test
 	void shouldReturnErrorWhenNoUriHeader() {
-		Message<Byte[]> inputMessage = new GenericMessage<>(buildPayload("input"));
+		Message<Object> inputMessage = new GenericMessage<>(buildPayload("input"));
 		StepVerifier.create(function.apply(Mono.just(inputMessage)))
 				.expectError()
 				.verify(VERIFY_TIMEOUT);

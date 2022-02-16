@@ -38,14 +38,14 @@ import static io.rsocket.broker.http.bridge.core.TagBuilder.buildTags;
  * @author Olga Maciaszek-Sharma
  * @since 0.3.0
  */
-public class FireAndForgetFunction extends AbstractHttpRSocketFunction<Mono<Message<Byte[]>>, Mono<Void>> {
+public class FireAndForgetFunction extends AbstractHttpRSocketFunction<Mono<Message<Object>>, Mono<Void>> {
 
 	public FireAndForgetFunction(BrokerRSocketRequester requester, ObjectProvider<ClientTransportFactory> transportFactories, RSocketHttpBridgeProperties properties) {
 		super(requester, transportFactories, properties);
 	}
 
 	@Override
-	public Mono<Void> apply(Mono<Message<Byte[]>> messageMono) {
+	public Mono<Void> apply(Mono<Message<Object>> messageMono) {
 		return messageMono.flatMap(message -> {
 			String uriString = (String) message.getHeaders().get("uri");
 			if (uriString == null) {
