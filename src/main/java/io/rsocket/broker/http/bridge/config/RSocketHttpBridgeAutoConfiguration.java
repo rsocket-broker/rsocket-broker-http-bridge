@@ -40,10 +40,13 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 
 /**
- * AutoConfiguration for HTTP Rsocket Bridge.
+ * AutoConfiguration for HTTP RSocket Bridge.
  *
  * @author Olga Maciaszek-Sharma
  * @since 0.3.0
@@ -69,23 +72,31 @@ public class RSocketHttpBridgeAutoConfiguration implements ApplicationContextAwa
 	// Stay with four different endpoints or switch to some other way of differentiating?
 
 	@Bean
-	public Function<Mono<Message<Byte[]>>, Mono<Message<Byte[]>>> rr() {
+	public Function<Mono<Message<Object>>, Mono<Message<Object>>> rr() {
 		return new RequestResponseFunction(requester, transportFactories, properties);
 	}
 
 	@Bean
-	public Function<Flux<Message<Byte[]>>, Flux<Message<Byte[]>>> rc() {
+	public Function<Flux<Message<Object>>, Flux<Message<Object>>> rc() {
 		return new RequestChannelFunction(requester, transportFactories, properties);
 	}
 
 	@Bean
-	public Function<Mono<Message<Byte[]>>, Flux<Message<Byte[]>>> rs() {
+	public Function<Mono<Message<Object>>, Flux<Message<Object>>> rs() {
 		return new RequestStreamFunction(requester, transportFactories, properties);
 	}
 
 	@Bean
-	public Function<Mono<Message<Byte[]>>, Mono<Void>> ff() {
+	public Function<Mono<Message<Object>>, Mono<Void>> ff() {
 		return new FireAndForgetFunction(requester, transportFactories, properties);
+	}
+
+	@Bean
+	public RSocketStrategies rSocketStrategies() {
+		return RSocketStrategies.builder()
+				.encoders(encoders -> encoders.add(new Jackson2JsonEncoder()))
+				.decoders(decoders -> decoders.add(new Jackson2JsonDecoder()))
+				.build();
 	}
 
 	@Override

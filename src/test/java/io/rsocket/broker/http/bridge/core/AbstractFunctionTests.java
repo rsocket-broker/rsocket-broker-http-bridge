@@ -25,9 +25,7 @@ import io.rsocket.broker.client.spring.BrokerRSocketRequester;
 import io.rsocket.broker.http.bridge.config.RSocketHttpBridgeProperties;
 import org.junit.jupiter.api.BeforeEach;
 
-import org.springframework.messaging.Message;
 import org.springframework.messaging.rsocket.RSocketRequester;
-import org.springframework.messaging.support.GenericMessage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,7 +45,7 @@ abstract class AbstractFunctionTests {
 	protected BrokerRSocketRequester requester = mock(BrokerRSocketRequester.class);
 	protected BrokerRSocketRequester.BrokerRequestSpec requestSpec = mock(BrokerRSocketRequester.BrokerRequestSpec.class);
 	protected RSocketRequester.RetrieveSpec retrieveSpec = mock(RSocketRequester.RetrieveSpec.class);
-	protected Message<Byte[]> outputMessage = new GenericMessage<>(buildPayload("output"));
+	protected String output = "output";
 	protected RSocketHttpBridgeProperties properties = new RSocketHttpBridgeProperties();
 
 	@BeforeEach

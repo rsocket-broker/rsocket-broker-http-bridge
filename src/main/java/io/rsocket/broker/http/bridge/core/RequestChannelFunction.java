@@ -24,8 +24,8 @@ import io.rsocket.broker.http.bridge.config.RSocketHttpBridgeProperties;
 import reactor.core.publisher.Flux;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.GenericMessage;
 
 import static io.rsocket.broker.common.WellKnownKey.SERVICE_NAME;
 import static io.rsocket.broker.http.bridge.core.PathUtils.resolveAddress;
@@ -39,7 +39,7 @@ import static io.rsocket.broker.http.bridge.core.TagBuilder.buildTags;
  * @author Olga Maciaszek-Sharma
  * @since 0.3.0
  */
-public class RequestChannelFunction extends AbstractHttpRSocketFunction<Flux<Message<Byte[]>>, Flux<Message<Byte[]>>> {
+public class RequestChannelFunction extends AbstractHttpRSocketFunction<Flux<Message<Object>>, Flux<Message<Object>>> {
 
 	public RequestChannelFunction(BrokerRSocketRequester requester, ObjectProvider<ClientTransportFactory> transportFactories,
 			RSocketHttpBridgeProperties properties) {
@@ -47,7 +47,7 @@ public class RequestChannelFunction extends AbstractHttpRSocketFunction<Flux<Mes
 	}
 
 	@Override
-	public Flux<Message<Byte[]>> apply(Flux<Message<Byte[]>> messageFlux) {
+	public Flux<Message<Object>> apply(Flux<Message<Object>> messageFlux) {
 		return messageFlux.flatMap(message -> {
 			String uriString = (String) message.getHeaders().get("uri");
 			if (uriString == null) {
@@ -64,8 +64,8 @@ public class RequestChannelFunction extends AbstractHttpRSocketFunction<Flux<Mes
 					.address(builder -> builder.with(SERVICE_NAME, serviceName)
 							.with(buildTags(tagString)))
 					.data(Flux.just(message.getPayload()))
-					.retrieveFlux(new ParameterizedTypeReference<Message<Byte[]>>() {
-					})
+					.retrieveFlux(Object.class)
+					.map(object -> ((Message<Object>) new GenericMessage<>(object)))
 					.timeout(timeout,
 							Flux.defer(() -> {
 								logTimeout(serviceName, route);

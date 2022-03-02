@@ -24,14 +24,13 @@ import io.rsocket.broker.http.bridge.support.SimpleClientTransportFactory;
 import io.rsocket.broker.http.bridge.support.SimpleObjectProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -46,8 +45,8 @@ public class RequestChannelFunctionTests extends AbstractFunctionTests {
 
 	@BeforeEach
 	void setup() {
-		when(retrieveSpec.retrieveFlux(any(ParameterizedTypeReference.class)))
-				.thenReturn(Flux.just(outputMessage));
+		when(retrieveSpec.retrieveFlux(ArgumentMatchers.<Class<Object>>any()))
+				.thenReturn(Flux.just(output));
 		super.setup();
 		function = new RequestChannelFunction(requester, new SimpleObjectProvider<>(new SimpleClientTransportFactory()),
 				properties);
@@ -57,17 +56,17 @@ public class RequestChannelFunctionTests extends AbstractFunctionTests {
 	void shouldReturnResponse() {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put("uri", "http://test.org/testAddress/testRoute");
-		Message<Byte[]> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
+		Message<Object> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
 		StepVerifier.create(function.apply(Flux.just(inputMessage)))
 				.expectSubscription()
-				.expectNext(outputMessage)
+				.expectNextMatches(message -> message.getPayload().equals(output))
 				.thenCancel()
 				.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldReturnErrorWhenNoUriHeader() {
-		Message<Byte[]> inputMessage = new GenericMessage<>(buildPayload("input"));
+		Message<Object> inputMessage = new GenericMessage<>(buildPayload("input"));
 		StepVerifier.create(function.apply(Flux.just(inputMessage)))
 				.expectError()
 				.verify(VERIFY_TIMEOUT);
@@ -81,7 +80,7 @@ public class RequestChannelFunctionTests extends AbstractFunctionTests {
 					properties);
 			Map<String, Object> headers = new HashMap<>();
 			headers.put("uri", "http://test.org/testAddress/testRoute");
-			Message<Byte[]> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
+					Message<Object> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
 			return function
 					.apply(Flux.just(inputMessage))
 					.delaySequence(Duration.ofMillis(2));
