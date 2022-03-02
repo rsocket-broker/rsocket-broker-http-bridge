@@ -80,7 +80,7 @@ class RequestResponseFunctionTests extends AbstractFunctionTests {
 					properties);
 			Map<String, Object> headers = new HashMap<>();
 			headers.put("uri", "http://test.org/testAddress/testRoute");
-					Message<Object> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
+			Message<Object> inputMessage = new GenericMessage<>(buildPayload("input"), headers);
 			return function
 					.apply(Mono.just(inputMessage))
 					.delayElement(Duration.ofMillis(2));
