@@ -40,10 +40,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.rsocket.RSocketStrategies;
 
 /**
  * AutoConfiguration for HTTP RSocket Bridge.
@@ -55,6 +53,7 @@ import org.springframework.messaging.rsocket.RSocketStrategies;
 @ConditionalOnBean({BrokerRSocketRequester.class, BrokerRSocketRequesterBuilder.class})
 @ConditionalOnProperty(value = "spring.cloud.rsocket.broker.http-bridge.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(RSocketHttpBridgeProperties.class)
+@Import(RSocketHttpBridgeStrategiesConfiguration.class)
 public class RSocketHttpBridgeAutoConfiguration implements ApplicationContextAware, InitializingBean {
 
 	private final BrokerRSocketRequester requester;
@@ -91,14 +90,6 @@ public class RSocketHttpBridgeAutoConfiguration implements ApplicationContextAwa
 		return new FireAndForgetFunction(requester, transportFactories, properties);
 	}
 
-	@Bean
-	public RSocketStrategies rSocketStrategies() {
-		return RSocketStrategies.builder()
-				.encoders(encoders -> encoders.add(new Jackson2JsonEncoder()))
-				.decoders(decoders -> decoders.add(new Jackson2JsonDecoder()))
-				.build();
-	}
-
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = (ConfigurableApplicationContext) applicationContext;
@@ -106,7 +97,7 @@ public class RSocketHttpBridgeAutoConfiguration implements ApplicationContextAwa
 
 	// Setting the default Spring Cloud Function function definition.
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		FunctionProperties functionProperties = applicationContext
 				.getBean(FunctionProperties.class);
 		String definition = functionProperties.getDefinition();
