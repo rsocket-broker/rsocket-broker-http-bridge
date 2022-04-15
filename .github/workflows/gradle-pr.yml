@@ -32,3 +32,6 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build -Dbuild.number=$GITHUB_RUN_ID
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          buildNumber: ${{ github.run_number }}

@@ -3,6 +3,9 @@
 
 name: Release Java CI with Gradle
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
   # Trigger the workflow on push
   push:
@@ -31,6 +34,9 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew clean build -x test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          buildNumber: ${{ github.run_number }}
       - name: Publish Packages to Sonotype
         run: ./gradlew -Pversion="${githubRef#refs/tags/}" -PbuildNumber="${buildNumber}" sign publishMavenPublicationToSonatypeRepository
         env:
