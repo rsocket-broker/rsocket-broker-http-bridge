@@ -1,6 +1,8 @@
 plugins {
 	id 'com.jfrog.artifactory' version '4.21.0' apply false
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+    id 'maven-publish'
 }
 
 apply plugin: 'java-library'
@@ -9,7 +11,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'signing'
 
-sourceCompatibility = '1.8'
+sourceCompatibility = '17'
 
 repositories {
 	if (version.endsWith('SNAPSHOT')) {
@@ -63,31 +65,18 @@ dependencies {
 	testImplementation'io.projectreactor:reactor-test'
 }
 
-plugins.withType(JavaLibraryPlugin) {
-	task sourcesJar(type: Jar) {
-		classifier 'sources'
-		from sourceSets.main.allJava
-	}
 
-	task javadocJar(type: Jar, dependsOn: javadoc) {
-		classifier 'javadoc'
-		from javadoc.destinationDir
-	}
-
-	plugins.withType(MavenPublishPlugin) {
-		publishing {
-			publications {
-				maven(MavenPublication) {
-					from components.java
-					artifact sourcesJar
-					artifact javadocJar
-				}
-			}
+java {
+	withSourcesJar()
+	withJavadocJar()
+}
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
 		}
 	}
 }
-
-
 
 test {
 	useJUnitPlatform()
